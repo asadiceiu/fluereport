@@ -110,6 +110,35 @@
   .step h3{font-family:var(--disp);font-size:21px;font-weight:600;margin-bottom:8px}
   .step p{font-size:15.5px;color:var(--cream-mut)}
 
+  /* iPad device visual */
+  .device-wrap{max-width:860px;margin:0 auto;container-type:inline-size}
+  .device-ipad{position:relative}
+  .device-ipad img.bezel{display:block;width:100%;height:auto;position:relative;z-index:2;pointer-events:none}
+  .ipad-screen{position:absolute;left:4.13%;top:5.13%;width:91.73%;height:89.74%;z-index:1;background:#F1EADC;overflow:hidden;display:flex;flex-direction:column;font-size:1.55cqw;color:var(--paper-ink);border-radius:1.6cqw}
+  .app-bar{display:flex;justify-content:space-between;align-items:center;background:var(--soot-2);color:var(--cream-text);padding:1.2% 2.2%;font-family:var(--disp);font-size:1.7cqw}
+  .app-bar .ab-r{font-family:var(--mono);font-size:1.25cqw;color:var(--cream-mut)}
+  .app-body{display:flex;flex:1;min-height:0}
+  .app-side{width:27%;background:#E9E0CD;border-right:1px solid #D6C9AE;padding:1.5% 0}
+  .side-item{padding:3.5% 8%;font-size:1.5cqw;color:#6B5C49;display:flex;justify-content:space-between;align-items:center}
+  .side-item .st{font-family:var(--mono);font-size:1.3cqw}
+  .side-item.done .st{color:#5A7A4A}
+  .side-item.active{background:var(--brick);color:#fff;font-weight:600}
+  .side-item.active .st{color:#F6D8A8}
+  .app-main{flex:1;padding:2.2% 2.6%;display:flex;flex-direction:column;gap:1.6%}
+  .f-title{font-family:var(--disp);font-weight:600;font-size:2cqw}
+  .f-photo{flex:1;min-height:0;border-radius:.8cqw;background:linear-gradient(135deg,#5A4A3A,#33291F 55%,#241C14);position:relative}
+  .f-photo .annot{position:absolute;left:56%;top:30%;width:16%;height:26%;border:.28cqw solid #F2C063;border-radius:50%}
+  .f-photo .annot-arrow{position:absolute;left:38%;top:44%;width:17%;height:.3cqw;background:#F2C063;transform:rotate(-14deg)}
+  .f-photo .badge{position:absolute;right:2.5%;bottom:5%;font-family:var(--mono);font-size:1.1cqw;color:#EFE6D6;background:rgba(28,22,19,.72);padding:.5% 1.4%;border-radius:.5cqw}
+  .f-controls{display:flex;align-items:center;gap:1.8%;flex-wrap:wrap}
+  .seg{display:flex;border:1px solid #C9BA9C;border-radius:.7cqw;overflow:hidden;font-size:1.3cqw}
+  .seg span{padding:.55cqw 1.3cqw;background:#EFE7D6;color:#7A6B54;white-space:nowrap}
+  .seg span.sel{background:var(--brick);color:#fff;font-weight:600}
+  .code-chip{font-family:var(--mono);font-size:1.2cqw;background:#EFE7D6;border:1px solid #C9BA9C;border-radius:.6cqw;padding:.8% 1.6%;color:var(--brick)}
+  .app-foot{display:flex;justify-content:space-between;align-items:center;background:#E9E0CD;border-top:1px solid #D6C9AE;padding:1.2% 2.6%;font-family:var(--mono);font-size:1.25cqw;color:#6B5C49}
+  .app-foot .pdf-btn{background:var(--brick);color:#fff;font-family:var(--disp);font-size:1.5cqw;padding:.9% 2.6%;border-radius:.6cqw;font-weight:600}
+  .device-caption{text-align:center;font-family:var(--mono);font-size:12.5px;color:var(--cream-mut);margin-top:14px}
+
   /* money & armor */
   .armor{display:grid;grid-template-columns:1fr 1fr;gap:24px}
   .armor-card{background:var(--soot-2);border:1px solid var(--mortar);border-radius:var(--radius);padding:28px}
@@ -314,6 +343,43 @@
         <h3>Deliver PDF + estimate</h3>
         <p>A branded report the homeowner, their realtor, and their insurance company can actually read — with your repair estimate attached while the photos are still scary. That's how a $300 inspection becomes a reline job.</p>
       </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Built for the iPad in your hand</h2>
+    <p class="lede">Big touch targets that work with gloves on. The whole Level 2 flow on one screen — checklist on the left, finding in front of you, photo markup with your finger. Works with zero bars in the basement; syncs from the driveway.</p>
+    <div class="device-wrap">
+      <div class="device-ipad" role="img" aria-label="Product mockup: FlueReport running on an iPad in landscape — Level 2 checklist in a sidebar, a flue tile photo being annotated, severity set to Hazard with NFPA 211 code reference">
+        <div class="ipad-screen" aria-hidden="true">
+          <div class="app-bar"><span>FlueReport — Level 2 · 41 Maple St</span><span class="ab-r">14 photos · 3 findings · offline ✓</span></div>
+          <div class="app-body">
+            <div class="app-side">
+              <div class="side-item done">Exterior <span class="st">✓ 4</span></div>
+              <div class="side-item done">Crown <span class="st">✓ 2</span></div>
+              <div class="side-item active">Flue <span class="st">● 3</span></div>
+              <div class="side-item">Smoke chamber <span class="st">–</span></div>
+              <div class="side-item">Firebox <span class="st">–</span></div>
+              <div class="side-item">Clearances <span class="st">–</span></div>
+            </div>
+            <div class="app-main">
+              <div class="f-title">Flue — cracked tile, third joint</div>
+              <div class="f-photo">
+                <div class="annot-arrow"></div>
+                <div class="annot"></div>
+                <div class="badge">photo 9 of 14 · 14 ft</div>
+              </div>
+              <div class="f-controls">
+                <div class="seg"><span>Acceptable</span><span>Needs attention</span><span class="sel">Hazard</span></div>
+                <div class="code-chip">NFPA 211 §14.9</div>
+              </div>
+            </div>
+          </div>
+          <div class="app-foot"><span>Report #26-0187 · auto-saved</span><span class="pdf-btn">Generate PDF ➔</span></div>
+        </div>
+        <img class="bezel" src="assets/ipad-land.png" alt="" width="1400" height="1073" loading="lazy">
+      </div>
+      <p class="device-caption">Product mockup — Level 2 in progress, checklist to finding to PDF</p>
     </div>
   </section>
 
