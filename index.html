@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FlueReport — chimney inspection software for NFPA 211 Level 1 &amp; 2 reports</title>
+<meta name="description" content="Chimney inspection software built only for reports: NFPA 211 Level 1 & 2 checklists, photo findings with code references, branded PDF delivered before you leave the driveway. $79/mo — keep Housecall Pro or Jobber for everything else.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Zilla+Slab:wght@500;600;700&family=Source+Sans+3:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<!-- TODO before launch: add Plausible snippet for fluereport.com -->
+<!-- <script defer data-domain="fluereport.com" src="https://plausible.io/js/script.tagged-events.js"></script> -->
+<style>
+  :root{
+    --soot:#1C1613;
+    --soot-2:#2A211C;
+    --mortar:#4A3E36;
+    --brick:#B14A32;
+    --brick-dark:#8E3A27;
+    --flame:#E39A3B;
+    --paper:#F6F0E2;
+    --paper-ink:#2B2118;
+    --paper-soft:#7A6B5C;
+    --cream-text:#EFE6D6;
+    --cream-mut:#B7A996;
+    --ok:#7FA96B;
+    --radius:8px;
+    --disp:'Zilla Slab',serif;
+    --body:'Source Sans 3',sans-serif;
+    --mono:'IBM Plex Mono',monospace;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto} *,*::before,*::after{animation:none!important;transition:none!important}}
+  body{font-family:var(--body);background:var(--soot);color:var(--cream-text);line-height:1.6;font-size:18px}
+  a{color:var(--flame)}
+  :focus-visible{outline:3px solid var(--flame);outline-offset:2px}
+  .wrap{max-width:1060px;margin:0 auto;padding:0 24px}
+
+  .bricks{height:14px;background:repeating-linear-gradient(90deg,var(--brick) 0 46px,var(--mortar) 46px 50px);border-top:2px solid var(--mortar);border-bottom:2px solid var(--mortar);opacity:.85}
+
+  header{position:sticky;top:0;z-index:20;background:rgba(28,22,19,.97);border-bottom:1px solid var(--mortar)}
+  .nav{display:flex;align-items:center;justify-content:space-between;padding:13px 0;gap:12px}
+  .logo{font-family:var(--disp);font-weight:700;font-size:24px;color:var(--cream-text);text-decoration:none}
+  .logo span{color:var(--flame)}
+  .nav-right{display:flex;align-items:center;gap:14px}
+  .price-chip{font-family:var(--mono);font-size:13.5px;font-weight:600;color:var(--cream-mut)}
+  .nav .cta{background:var(--brick);color:#fff;text-decoration:none;font-family:var(--disp);font-weight:600;font-size:16px;padding:9px 18px;border-radius:var(--radius);white-space:nowrap;border:none;cursor:pointer}
+  .nav .cta:hover{background:var(--flame);color:var(--soot)}
+
+  .eyebrow{font-family:var(--mono);letter-spacing:.12em;font-size:13px;font-weight:600;color:var(--flame);text-transform:uppercase;display:inline-block;margin-bottom:18px}
+
+  .hero{padding:56px 0 40px;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,470px);gap:44px;align-items:center}
+  .hero h1{font-family:var(--disp);font-weight:700;font-size:clamp(34px,5vw,52px);line-height:1.1}
+  .hero h1 em{font-style:normal;color:var(--flame)}
+  .hero p.sub{margin:18px 0 6px;font-size:18.5px;color:var(--cream-mut);max-width:520px}
+  .hero p.sub b{color:var(--cream-text)}
+  .hero-cta{margin-top:22px;display:flex;align-items:center;gap:18px;flex-wrap:wrap}
+  .btn-primary{display:inline-block;background:var(--brick);color:#fff;border:none;cursor:pointer;font-family:var(--disp);font-weight:700;font-size:20px;padding:15px 30px;border-radius:var(--radius);text-decoration:none;box-shadow:0 3px 0 var(--brick-dark)}
+  .btn-primary:hover{background:var(--flame);color:var(--soot);box-shadow:0 3px 0 #A8701F}
+  .cta-fine{font-size:14px;color:var(--cream-mut);line-height:1.45}
+  .cta-fine b{color:var(--cream-text);font-family:var(--mono);font-size:14.5px}
+
+  /* report artifact */
+  .report{background:var(--paper);color:var(--paper-ink);border-radius:4px;box-shadow:0 18px 44px rgba(0,0,0,.5),0 2px 8px rgba(0,0,0,.4);padding:26px 28px;font-size:13.5px;transform:rotate(.6deg)}
+  .report .rhead{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:2.5px solid var(--paper-ink);padding-bottom:10px;margin-bottom:12px;gap:8px}
+  .report .rbiz{font-family:var(--disp);font-weight:700;font-size:17px;line-height:1.25}
+  .report .rbiz small{display:block;font-family:var(--body);font-weight:400;font-size:11.5px;color:var(--paper-soft)}
+  .report .rmeta{font-family:var(--mono);font-size:10.5px;text-align:right;color:var(--paper-soft)}
+  .report .rtitle{font-family:var(--disp);font-weight:600;font-size:14.5px;margin-bottom:10px}
+  .report .rtitle span{background:var(--paper-ink);color:var(--paper);padding:1px 8px;border-radius:3px;font-size:12px;margin-right:6px}
+  .finding{display:grid;grid-template-columns:64px 1fr;gap:10px;padding:9px 0;border-top:1px solid #DDD2BC}
+  .photo{height:48px;border-radius:3px;background:linear-gradient(135deg,#5A4A3A,#33291F 60%,#241C14);position:relative}
+  .photo::after{content:"📷";position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:15px;opacity:.85}
+  .finding h4{font-weight:600;font-size:12.5px}
+  .sev{font-family:var(--mono);font-size:10px;font-weight:600;padding:1px 6px;border-radius:3px;margin-left:6px;vertical-align:1px}
+  .sev.hazard{background:#E9BFAF;color:#8C2F16}
+  .sev.attention{background:#F3D9A4;color:#7A5A12}
+  .sev.acceptable{background:#D9E4CE;color:#3F5A31}
+  .finding p{font-size:11.5px;color:var(--paper-soft);line-height:1.45}
+  .finding p code{font-family:var(--mono);font-size:10px;color:var(--brick)}
+  .report .rfoot{border-top:2.5px solid var(--paper-ink);margin-top:10px;padding-top:9px;display:flex;justify-content:space-between;font-family:var(--mono);font-size:10.5px;color:var(--paper-soft);gap:8px;flex-wrap:wrap}
+  .report .rfoot b{color:var(--paper-ink)}
+  .report-caption{text-align:center;font-family:var(--mono);font-size:12.5px;color:var(--cream-mut);margin-top:12px}
+
+  /* spec strip */
+  .spec-strip{background:var(--soot-2);border:1px solid var(--mortar);border-radius:var(--radius);display:grid;grid-template-columns:repeat(3,1fr);text-align:center;overflow:hidden}
+  .spec{padding:22px 14px;border-right:1px solid var(--mortar)}
+  .spec:last-child{border-right:none}
+  .spec .big{font-family:var(--disp);font-weight:700;font-size:32px;color:var(--flame);line-height:1.1}
+  .spec .small{font-size:13.5px;color:var(--cream-mut);margin-top:4px;line-height:1.4}
+
+  section{padding:52px 0}
+  h2{font-family:var(--disp);font-weight:700;font-size:clamp(26px,3.8vw,38px);margin-bottom:14px}
+  .lede{font-size:18px;color:var(--cream-mut);max-width:680px;margin-bottom:30px}
+
+  /* pain mirror */
+  .pain{background:var(--soot-2);border:1px solid var(--mortar);border-radius:var(--radius);padding:38px 34px}
+  .pain .grid{display:grid;grid-template-columns:1fr 1fr;gap:30px;align-items:center;margin-top:8px}
+  .pain p{font-size:17px;color:var(--cream-mut);line-height:1.65}
+  .pain p b{color:var(--flame)}
+  .night{font-family:var(--mono);font-size:13px;background:var(--soot);border:1px solid var(--mortar);border-radius:var(--radius);padding:20px;line-height:2.05}
+  .night .t{color:#8D7F6F}
+  .night .x{color:#D08A6E}
+  .night .ok{color:var(--ok)}
+
+  .steps{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+  .step{background:var(--soot-2);border:1px solid var(--mortar);border-radius:var(--radius);padding:24px}
+  .step .kicker{font-family:var(--mono);font-size:11.5px;font-weight:600;color:var(--flame);letter-spacing:.08em;margin-bottom:10px;text-transform:uppercase}
+  .step h3{font-family:var(--disp);font-size:21px;font-weight:600;margin-bottom:8px}
+  .step p{font-size:15.5px;color:var(--cream-mut)}
+
+  /* money & armor */
+  .armor{display:grid;grid-template-columns:1fr 1fr;gap:24px}
+  .armor-card{background:var(--soot-2);border:1px solid var(--mortar);border-radius:var(--radius);padding:28px}
+  .armor-card h3{font-family:var(--disp);font-size:23px;font-weight:600;margin-bottom:12px;color:var(--flame)}
+  .armor-card p{font-size:16px;color:var(--cream-mut);margin-bottom:12px}
+  .armor-card p:last-child{margin-bottom:0}
+  .armor-card p b{color:var(--cream-text)}
+  .upsell-math{font-family:var(--mono);font-size:14px;background:var(--soot);border:1px solid var(--mortar);border-radius:var(--radius);padding:16px;line-height:2;margin-top:8px}
+  .upsell-math .dim{color:#8D7F6F}
+  .upsell-math .hl{color:var(--flame);font-weight:600}
+  .cya{border-left:4px solid var(--brick);padding:6px 0 6px 16px;font-family:var(--disp);font-size:19px;line-height:1.5;color:var(--cream-text);margin-top:8px}
+
+  /* versus */
+  .versus{background:var(--soot-2);border:1px solid var(--mortar);border-radius:var(--radius);padding:34px;display:grid;grid-template-columns:1fr 1fr;gap:30px;align-items:center}
+  .versus p{color:var(--cream-mut);font-size:16.5px}
+  .versus p b{color:var(--cream-text)}
+  .compare{font-family:var(--mono);font-size:13.5px;line-height:2.1;background:var(--soot);border-radius:var(--radius);padding:20px;border:1px solid var(--mortar)}
+  .compare .them{color:#8D7F6F}
+  .compare .us{color:var(--flame);font-weight:600}
+
+  .price-card{max-width:600px;margin:0 auto;background:var(--paper);color:var(--paper-ink);border-radius:var(--radius);padding:34px;text-align:center;box-shadow:0 14px 40px rgba(0,0,0,.45)}
+  .price-card .amount{font-family:var(--disp);font-weight:700;font-size:64px;line-height:1}
+  .price-card .amount small{font-size:22px;color:var(--paper-soft);font-weight:500}
+  .price-card .flatline{font-family:var(--mono);font-size:13.5px;color:var(--brick);font-weight:600;margin-top:4px}
+  .price-card ul{list-style:none;text-align:left;margin:22px auto;max-width:460px}
+  .price-card li{padding:7px 0 7px 26px;position:relative;font-size:15.5px}
+  .price-card li::before{content:"▲";color:var(--brick);position:absolute;left:2px;top:10px;font-size:11px}
+  .price-note{font-size:13.5px;color:var(--paper-soft);margin-top:12px}
+  .founding{margin:18px auto 6px;max-width:460px;background:#EFE3CB;border:1.5px solid var(--flame);border-radius:var(--radius);padding:12px 16px;font-size:15px;color:var(--paper-ink);text-align:left}
+  .founding b{color:var(--brick)}
+
+  #early-access{display:none;padding-top:8px}
+  #early-access.open{display:block}
+  .signup-card{max-width:600px;margin:0 auto;background:var(--soot-2);border:2px solid var(--flame);border-radius:var(--radius);padding:30px}
+  .signup-card h3{font-family:var(--disp);font-size:25px;color:var(--flame);margin-bottom:6px}
+  .signup-card p{font-size:15.5px;color:var(--cream-mut);margin-bottom:14px}
+  fieldset{border:none;margin:14px 0 0}
+  legend{font-family:var(--mono);text-transform:uppercase;letter-spacing:.08em;font-size:12.5px;font-weight:600;margin-bottom:8px;color:var(--cream-text)}
+  .radio-row{display:flex;flex-wrap:wrap;gap:8px}
+  .radio-row label{display:inline-flex;align-items:center;gap:7px;background:var(--soot);border:1.5px solid var(--mortar);border-radius:20px;padding:8px 14px;font-size:14.5px;cursor:pointer;color:var(--cream-text)}
+  .radio-row label:has(input:checked){border-color:var(--flame);background:var(--flame);color:var(--soot);font-weight:600}
+  .radio-row input{accent-color:var(--brick)}
+  .signup-card .email-label{display:block;font-family:var(--mono);text-transform:uppercase;letter-spacing:.08em;font-size:12.5px;font-weight:600;margin:18px 0 5px;color:var(--cream-text)}
+  .signup-card input[type=email]{width:100%;font-size:17px;padding:12px;border:1px solid var(--mortar);border-radius:var(--radius);font-family:var(--body);background:var(--soot);color:var(--cream-text)}
+  .signup-card button{margin-top:18px;width:100%}
+  .thanks{display:none;text-align:center;font-family:var(--disp);font-size:22px;color:var(--flame);padding:20px 0}
+  .talk{max-width:600px;margin:14px auto 0;text-align:center;font-size:14.5px;color:var(--cream-mut)}
+
+  .founder{background:var(--soot-2);border:1px solid var(--mortar);border-left:5px solid var(--brick);border-radius:var(--radius);padding:28px 30px;max-width:760px;margin:0 auto}
+  .founder p{font-size:16.5px;margin-bottom:12px;color:var(--cream-mut)}
+  .founder p b{color:var(--cream-text)}
+  .founder .sig{font-family:var(--disp);font-size:18px;margin-top:14px;color:var(--cream-text)}
+  .founder .sig small{display:block;font-family:var(--body);font-size:13.5px;color:var(--cream-mut)}
+
+  .faq details{background:var(--soot-2);border:1px solid var(--mortar);border-radius:var(--radius);margin-bottom:10px;padding:0 18px}
+  .faq summary{cursor:pointer;font-family:var(--disp);font-size:17.5px;font-weight:600;padding:14px 0;list-style:none}
+  .faq summary::-webkit-details-marker{display:none}
+  .faq summary::before{content:"+";color:var(--flame);font-weight:700;margin-right:10px}
+  .faq details[open] summary::before{content:"–"}
+  .faq details p{padding:0 0 16px 24px;color:var(--cream-mut);font-size:15.5px;max-width:700px}
+
+  .final-cta{text-align:center}
+
+  footer{border-top:1px solid var(--mortar);padding:26px 0 96px;font-size:14px;color:var(--cream-mut)}
+  footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
+
+  .sticky-cta{position:fixed;bottom:0;left:0;right:0;z-index:30;background:var(--soot-2);border-top:1px solid var(--mortar);padding:10px 16px calc(10px + env(safe-area-inset-bottom));display:none;align-items:center;justify-content:space-between;gap:12px;box-shadow:0 -4px 14px rgba(0,0,0,.4)}
+  .sticky-cta .s-price{font-family:var(--mono);color:var(--flame);font-size:14px;font-weight:600;line-height:1.3}
+  .sticky-cta .s-price small{display:block;color:var(--cream-mut);font-size:11px;font-family:var(--body)}
+  .sticky-cta .btn-primary{font-size:17px;padding:11px 20px;box-shadow:none}
+
+  @media(max-width:900px){
+    .hero{grid-template-columns:1fr;padding-top:44px;gap:30px}
+    .report{transform:none}
+    .steps{grid-template-columns:1fr}
+    .pain .grid{grid-template-columns:1fr}
+    .armor{grid-template-columns:1fr}
+    .versus{grid-template-columns:1fr;padding:26px}
+    .spec-strip{grid-template-columns:1fr}
+    .spec{border-right:none;border-bottom:1px solid var(--mortar);padding:16px}
+    .spec:last-child{border-bottom:none}
+  }
+  @media(max-width:760px){ .sticky-cta{display:flex} }
+  @media(max-width:480px){
+    body{font-size:16px}
+    .wrap{padding:0 16px}
+    .price-chip{display:none}
+    .report{padding:18px 16px}
+    .report .rhead{flex-wrap:wrap}
+    .report .rmeta{text-align:left}
+    .finding{grid-template-columns:52px 1fr}
+    .pain{padding:24px 18px}
+    .night{font-size:11.5px;padding:14px}
+    .compare{font-size:11.5px;padding:14px}
+    .price-card{padding:24px 18px}
+    .founder{padding:22px 18px}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap nav">
+    <a class="logo" href="#">Flue<span>Report</span></a>
+    <div class="nav-right">
+      <span class="price-chip">$79/mo · reports only · keep your CRM</span>
+      <button class="cta trial-btn" type="button">Start free trial</button>
+    </div>
+  </div>
+</header>
+<div class="bricks" aria-hidden="true"></div>
+
+<main>
+<div class="wrap">
+  <div class="hero">
+    <div>
+      <span class="eyebrow">Chimney inspection software · NFPA 211 Level 1 &amp; 2</span>
+      <h1>The report that sells the repair — <em>finished before you leave the driveway.</em></h1>
+      <p class="sub">FlueReport does one thing: <b>NFPA 211 Level 1 &amp; 2 inspection reports</b>, written on your iPad as you walk the job. Photos land on the finding, severity tags and code references fill in, and the homeowner — and their realtor — get a branded PDF while your ladder's still on the truck. <b>Keep Housecall Pro or Jobber</b> for everything else.</p>
+      <div class="hero-cta">
+        <button class="btn-primary trial-btn" type="button">Start free trial — no card needed</button>
+        <div class="cta-fine"><b>$79/mo flat.</b> Unlimited reports &amp; photos.<br>No annual contract. Whole crew, one price.</div>
+      </div>
+    </div>
+    <div>
+      <div class="report" role="img" aria-label="Sample Level 2 chimney inspection report page produced by FlueReport, showing photo findings with severity tags and NFPA 211 code references">
+        <div class="rhead">
+          <div class="rbiz">Your Chimney Co.<br><small>CSIA-Certified Sweep · (555) 014-7712</small></div>
+          <div class="rmeta">LEVEL 2 INSPECTION<br>2026-09-14 · 41 Maple St<br>Report #26-0187</div>
+        </div>
+        <div class="rtitle"><span>4</span> Findings — flue &amp; smoke chamber</div>
+        <div class="finding">
+          <div class="photo" aria-hidden="true"></div>
+          <div>
+            <h4>Cracked flue tile, third joint <span class="sev hazard">HAZARD</span></h4>
+            <p>Vertical crack through clay liner at 14 ft. Combustion gas leakage path. <code>NFPA 211 §14.9</code> — reline before further use.</p>
+          </div>
+        </div>
+        <div class="finding">
+          <div class="photo" aria-hidden="true"></div>
+          <div>
+            <h4>Creosote, stage 2 accumulation <span class="sev attention">NEEDS ATTENTION</span></h4>
+            <p>Glazed deposits, upper third of flue. Sweep before burn season. <code>NFPA 211 §14.2</code></p>
+          </div>
+        </div>
+        <div class="finding">
+          <div class="photo" aria-hidden="true"></div>
+          <div>
+            <h4>Crown wash, hairline cracking <span class="sev acceptable">ACCEPTABLE</span></h4>
+            <p>No displacement. Photograph at next annual and compare.</p>
+          </div>
+        </div>
+        <div class="rfoot">
+          <span>Photos: <b>14 attached</b></span>
+          <span>Reline estimate: <b>attached</b></span>
+        </div>
+      </div>
+      <p class="report-caption">Sample report — this is what your customer holds</p>
+    </div>
+  </div>
+
+  <div class="spec-strip" role="list">
+    <div class="spec" role="listitem"><div class="big">$79 vs $135–280</div><div class="small">FlueReport vs the all-in-one platforms — because you already own a CRM</div></div>
+    <div class="spec" role="listitem"><div class="big">Level 1 &amp; 2</div><div class="small">checklists organized to NFPA 211, code reference on every finding</div></div>
+    <div class="spec" role="listitem"><div class="big">0 bars</div><div class="small">works offline — basements, chases, rural jobs; syncs back in coverage</div></div>
+  </div>
+</div>
+
+<div class="bricks" aria-hidden="true" style="margin-top:44px"></div>
+
+<div class="wrap">
+  <section class="pain">
+    <h2>Fall rush is coming. Your reports shouldn't wait for it.</h2>
+    <div class="grid">
+      <p>October through December the phones ring faster than you can answer them. Four inspections a day, <b>forty photos per chimney</b> sitting in a camera roll — and the reports get typed up at the kitchen table at 9pm, or Thursday, or never. Meanwhile the customer's already gotten a second opinion, and the finding you didn't write down? <b>You own it.</b></p>
+      <div class="night" aria-hidden="true">
+        <div><span class="t">4:10p</span> <span class="x">last inspection of the day — 38 photos</span></div>
+        <div><span class="t">8:45p</span> <span class="x">which photo was the flue crack??</span></div>
+        <div><span class="t">9:30p</span> <span class="x">typing findings into Word template</span></div>
+        <div><span class="t">10:15p</span> <span class="x">"I'll finish it tomorrow"</span></div>
+        <div><span class="t">&nbsp;</span> <span class="ok">— or —</span></div>
+        <div><span class="t">4:35p</span> <span class="ok">report + reline estimate sent from the driveway ✓</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>How it works</h2>
+    <div class="steps">
+      <div class="step">
+        <div class="kicker">Step 1 — On the roof &amp; in the firebox</div>
+        <h3>Walk the checklist</h3>
+        <p>Level 1 and Level 2 flows organized the way you actually inspect: exterior, crown, flue, smoke chamber, firebox, clearances to combustibles. Nothing gets missed on the fourth job of the day — and nothing undocumented comes back on you.</p>
+      </div>
+      <div class="step">
+        <div class="kicker">Step 2 — As you go</div>
+        <h3>Snap, tag, done</h3>
+        <p>Photos drop straight onto the finding — draw the arrow on the crack, tag it hazard / needs attention / acceptable, and the NFPA 211 reference fills in. The camera-roll-to-Word shuffle is gone.</p>
+      </div>
+      <div class="step">
+        <div class="kicker">Step 3 — In the driveway</div>
+        <h3>Deliver PDF + estimate</h3>
+        <p>A branded report the homeowner, their realtor, and their insurance company can actually read — with your repair estimate attached while the photos are still scary. That's how a $300 inspection becomes a reline job.</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>The report is money. The report is armor.</h2>
+    <div class="armor">
+      <div class="armor-card">
+        <h3>Money — it sells the repair</h3>
+        <p>The written report with photos is what separates you from the $99 coupon guy — <b>he doesn't leave one; you do</b>. And when the customer's holding a page that shows the cracked tile with a code reference under it, your reline quote isn't a sales pitch. It's the obvious next step.</p>
+        <div class="upsell-math" aria-hidden="true">
+          <div><span class="dim">Level 2 inspection fee</span> ~ $300</div>
+          <div><span class="dim">finding, photographed &amp; tagged</span> <span class="hl">HAZARD</span></div>
+          <div><span class="dim">reline estimate, attached</span> <span class="hl">$4,600–8,000</span></div>
+        </div>
+      </div>
+      <div class="armor-card">
+        <h3>Armor — standard of care, in writing</h3>
+        <p>Realtors forward your report. Insurers read it after a fire. Code officials look for a qualified signature on it. Every finding you documented is proof you met the standard of care —</p>
+        <p class="cya">and if it's not in the report, it didn't happen.</p>
+        <p>Time-stamped findings, photo evidence, severity tags, and your license numbers on every page. The report protects the homeowner's house and your business in the same PDF.</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Level 2 for a closing on Friday? Handled.</h2>
+    <p class="lede">Real-estate inspections are your highest-stakes reports — a buyer's option window ticking, a realtor who'll judge you by the PDF, no room for "I'll email it next week." FlueReport's Level 2 flow covers the accessible portions checklist top to bottom and delivers a report a realtor forwards instead of questions — same day, from the driveway.</p>
+  </section>
+
+  <section class="versus">
+    <div>
+      <h2>Keep your CRM. Fix your reports.</h2>
+      <p>You already schedule and invoice in <b>Housecall Pro or Jobber</b> — that part of your business works. What the big chimney platforms actually charge $135–450/month for is mostly what you already own, plus the one thing you're missing: a real inspection report writer. <b>FlueReport is just that one thing</b>, at a price a one-truck shop can justify.</p>
+    </div>
+    <div class="compare" aria-hidden="true">
+      <div class="them">All-in-one platform · $135–280/mo</div>
+      <div class="them">+ migrate your whole business in</div>
+      <div class="them">+ pay again for CRM you already have</div>
+      <div class="us">FlueReport · $79/mo, reports only</div>
+      <div class="us">+ works beside Housecall Pro / Jobber, day one</div>
+    </div>
+  </section>
+
+  <section id="pricing">
+    <h2 style="text-align:center">One price. Whole crew.</h2>
+    <div class="price-card">
+      <div class="amount">$79<small>/month</small></div>
+      <div class="flatline">FLAT · UNLIMITED REPORTS · NO ANNUAL CONTRACT</div>
+      <ul>
+        <li>Unlimited Level 1 &amp; 2 reports, unlimited photos</li>
+        <li>Checklists organized to NFPA 211 — editable to your company standard</li>
+        <li>Photo markup, severity tags &amp; code references</li>
+        <li>Your logo, certifications &amp; license numbers on every page</li>
+        <li>Repair estimate attached to every report</li>
+        <li>Works offline — syncs when you're back in coverage</li>
+        <li>Cancel anytime and keep every report — full PDF export, no ransom</li>
+      </ul>
+      <div class="founding"><b>Founding crew:</b> the first 25 companies lock in $79/mo <b>for good</b> — the price never rises on you, and your checklist requests get built first.</div>
+      <button class="btn-primary trial-btn" type="button">Start free trial — no card needed</button>
+      <p class="price-note">14-day free trial · $790/year (2 months free) · cancel anytime</p>
+    </div>
+  </section>
+
+  <section id="early-access" aria-live="polite">
+    <div class="signup-card">
+      <h3>Launching October 2026 — before the phones melt</h3>
+      <p>We're finishing the build with a founding group of working sweeps. Two quick questions, then your email — founding companies lock in $79/mo for good.</p>
+      <!-- TODO before launch: replace YOUR_FORM_ID with real Formspree/Formspark endpoint -->
+      <form id="signup-form" action="https://formspree.io/f/YOUR_FORM_ID" method="POST">
+        <fieldset>
+          <legend>Inspections in a typical month</legend>
+          <div class="radio-row">
+            <label><input type="radio" name="inspections_per_month" value="1-5" required> 1–5</label>
+            <label><input type="radio" name="inspections_per_month" value="6-15"> 6–15</label>
+            <label><input type="radio" name="inspections_per_month" value="16-40"> 16–40</label>
+            <label><input type="radio" name="inspections_per_month" value="40+"> 40+</label>
+          </div>
+        </fieldset>
+        <fieldset>
+          <legend>What do you write reports with today?</legend>
+          <div class="radio-row">
+            <label><input type="radio" name="current_tool" value="paper" required> Paper / carbon forms</label>
+            <label><input type="radio" name="current_tool" value="word-pdf"> Word or PDF template</label>
+            <label><input type="radio" name="current_tool" value="chimspect"> ChimSpect or similar</label>
+            <label><input type="radio" name="current_tool" value="crm-notes"> Housecall Pro / Jobber notes</label>
+            <label><input type="radio" name="current_tool" value="none"> No written reports</label>
+          </div>
+        </fieldset>
+        <label class="email-label" for="email">Your email</label>
+        <input id="email" name="email" type="email" required placeholder="you@yourchimneyco.com" autocomplete="email">
+        <button class="btn-primary" type="submit">Lock in founding price</button>
+      </form>
+      <div class="thanks" id="thanks">✓ You're in. We'll be in touch shortly.</div>
+    </div>
+    <p class="talk">Rather talk than type? We're paying working sweeps for 15-minute research calls — <a href="mailto:hello@fluereport.com?subject=Research%20call">book one here</a>. A person answers, not a bot.</p>
+  </section>
+
+  <section>
+    <h2>From the builder</h2>
+    <div class="founder">
+      <p>Straight up: <b>I'm a software developer, not a sweep.</b> I won't pretend otherwise — this trade runs on 40-year veterans and it should. What I build is small, fast tools, and what I heard from sweeps is the same story every time: the business runs fine in Housecall Pro, but the reports live in a camera roll and a Word template, and they get written at 9pm during the exact months you're busiest.</p>
+      <p>So the deal is this: I build the report writer, a founding group of working sweeps tells me what a real Level 2 needs, and their checklist requests get built first. <b>What it doesn't do:</b> scheduling, invoicing, payments, marketing — you have those. One product, one price that never rises on founding members, and my direct email below.</p>
+      <p class="sig">— Asad<small>Builder, FlueReport · <a href="mailto:hello@fluereport.com">hello@fluereport.com</a></small></p>
+    </div>
+  </section>
+
+  <section class="faq">
+    <h2>Straight answers</h2>
+    <details>
+      <summary>Does it replace ChimSpect or Housecall Pro?</summary>
+      <p>It replaces the report-writing part only, on purpose. Keep scheduling, invoicing, and payments wherever they live today — FlueReport sits beside your CRM and does the inspection report better than an all-in-one ever will, at $79 instead of $135–280.</p>
+    </details>
+    <details>
+      <summary>What about my techs who only carry phones?</summary>
+      <p>Built iPad-first because that's the best tool for a photo-heavy report — but it runs on iPhone too, and a tech can shoot findings on a phone that land in the same report. Android crew? Say so in the signup form; it directly decides our roadmap order.</p>
+    </details>
+    <details>
+      <summary>Are the checklists really NFPA 211-based?</summary>
+      <p>The Level 1 and Level 2 flows follow NFPA 211's inspection scopes — exterior, crown, flue, smoke chamber, firebox, clearances — with a code reference available on every finding. Every checklist is editable: your company standard can be stricter than code, and the report will show it.</p>
+    </details>
+    <details>
+      <summary>What happens with no signal on the job?</summary>
+      <p>Everything works offline — checklist, photos, markup, the whole report. It syncs when you're back in coverage and sends from the driveway or the next parking lot.</p>
+    </details>
+    <details>
+      <summary>Will the price go up on me later?</summary>
+      <p>Founding companies lock $79/mo for good — capped at 25, in writing. No annual contract either; we'd rather earn October than lock you in through it.</p>
+    </details>
+  </section>
+
+  <section class="final-cta">
+    <h2>Fix your reports before the fall rush</h2>
+    <button class="btn-primary trial-btn" type="button">Start free trial — no card needed</button>
+    <p class="price-note" style="color:var(--cream-mut)">$79/mo flat · unlimited reports · keep your CRM</p>
+  </section>
+</div>
+</main>
+
+<div class="bricks" aria-hidden="true"></div>
+<footer>
+  <div class="wrap">
+    <div><b>FlueReport</b> — inspection reports for chimney professionals</div>
+    <div><a href="mailto:hello@fluereport.com">hello@fluereport.com</a></div>
+    <div style="flex-basis:100%;font-size:12.5px;margin-top:6px">FlueReport is independent software and is not affiliated with or endorsed by NFPA, CSIA, or NCSG. NFPA 211 is a standard of the National Fire Protection Association.</div>
+  </div>
+</footer>
+
+<div class="sticky-cta">
+  <div class="s-price">$79/mo flat<small>reports only · no card needed</small></div>
+  <button class="btn-primary trial-btn" type="button">Start free trial</button>
+</div>
+
+<script>
+(function(){
+  function track(ev){ if(window.plausible) plausible(ev); }
+  function openDoor(){
+    track('PricingClick');
+    var ea=document.getElementById('early-access');
+    ea.classList.add('open');
+    ea.scrollIntoView({behavior:'smooth',block:'start'});
+  }
+  document.querySelectorAll('.trial-btn').forEach(function(b){ b.addEventListener('click',openDoor); });
+  document.getElementById('signup-form').addEventListener('submit',function(e){
+    e.preventDefault();
+    track('Signup');
+    var f=e.target, data=new FormData(f);
+    fetch(f.action,{method:'POST',body:data,headers:{'Accept':'application/json'}})
+      .finally(function(){ f.style.display='none'; document.getElementById('thanks').style.display='block'; });
+  });
+})();
+</script>
+</body>
+</html>
