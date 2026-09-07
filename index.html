@@ -8,8 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Zilla+Slab:wght@500;600;700&family=Source+Sans+3:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
-<!-- TODO before launch: add Plausible snippet for fluereport.com -->
-<!-- <script defer data-domain="fluereport.com" src="https://plausible.io/js/script.tagged-events.js"></script> -->
+<!-- Analytics + forms: self-hosted probe-api (Cloudflare Worker) at api.fluereport.com -->
 <style>
   :root{
     --soot:#1C1613;
@@ -447,8 +446,8 @@
     <div class="signup-card">
       <h3>Launching October 2026 — before the phones melt</h3>
       <p>We're finishing the build with a founding group of working sweeps. Two quick questions, then your email — founding companies lock in $79/mo for good.</p>
-      <!-- TODO before launch: replace YOUR_FORM_ID with real Formspree/Formspark endpoint -->
-      <form id="signup-form" action="https://formspree.io/f/YOUR_FORM_ID" method="POST">
+      <form id="signup-form" action="#" method="POST">
+        <input type="text" name="website" value="" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px;height:0;overflow:hidden">
         <fieldset>
           <legend>Inspections in a typical month</legend>
           <div class="radio-row">
@@ -534,9 +533,18 @@
 
 <script>
 (function(){
-  function track(ev){ if(window.plausible) plausible(ev); }
+  var API='https://api.fluereport.com';
+  var qs=new URLSearchParams(location.search);
+  function send(ev){
+    var payload=JSON.stringify({event:ev,path:location.pathname,referrer:document.referrer,
+      utm_source:qs.get('utm_source')||'',utm_campaign:qs.get('utm_campaign')||''});
+    var ok=false;
+    try{ ok=navigator.sendBeacon(API+'/event',new Blob([payload],{type:'text/plain'})); }catch(err){}
+    if(!ok){ try{ fetch(API+'/event',{method:'POST',body:payload,keepalive:true}).catch(function(){}); }catch(err){} }
+  }
+  send('pageview');
   function openDoor(){
-    track('PricingClick');
+    send('pricing_click');
     var ea=document.getElementById('early-access');
     ea.classList.add('open');
     ea.scrollIntoView({behavior:'smooth',block:'start'});
@@ -544,10 +552,16 @@
   document.querySelectorAll('.trial-btn').forEach(function(b){ b.addEventListener('click',openDoor); });
   document.getElementById('signup-form').addEventListener('submit',function(e){
     e.preventDefault();
-    track('Signup');
-    var f=e.target, data=new FormData(f);
-    fetch(f.action,{method:'POST',body:data,headers:{'Accept':'application/json'}})
-      .finally(function(){ f.style.display='none'; document.getElementById('thanks').style.display='block'; });
+    var f=e.target;
+    var body=JSON.stringify({
+      email:f.email.value, q1:f.inspections_per_month.value||'', q2:f.current_tool.value||'',
+      website:f.website.value, utm_source:qs.get('utm_source')||''});
+    send('signup');
+    var th=document.getElementById('thanks');
+    function done(){ f.style.display='none'; th.style.display='block'; }
+    function fail(){ th.innerHTML='Hmm, that didn\'t go through — email <a href="mailto:hello@fluereport.com">hello@fluereport.com</a> and we\'ll add you by hand.'; f.style.display='none'; th.style.display='block'; }
+    fetch(API+'/signup',{method:'POST',body:body})
+      .then(function(r){ r.ok?done():fail(); }).catch(fail);
   });
 })();
 </script>
